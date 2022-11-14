@@ -9,9 +9,11 @@
  * Copyright 1993, 1994: Eric Youngdale (ericy@cais.com).
  */
 
+#include "linux/printk.h"
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
+#include <linux/xattr.h>
 #include <linux/mm.h>
 #include <linux/mman.h>
 #include <linux/errno.h>
@@ -687,6 +689,22 @@ static unsigned long randomize_stack_top(unsigned long stack_top)
 #endif
 }
 
+static int check_enforce_no_randomize(struct linux_binprm *bprm) {
+	int retval;
+	struct inode *inode;
+	struct dentry *dentry;
+	char xattr_buffer[64];
+	dentry = bprm->file->f_path.dentry;
+	inode = dentry->d_inode;
+
+	retval = __vfs_getxattr(dentry, inode, "security.no_randomize", xattr_buffer, sizeof(xattr_buffer) - 1);
+	if (retval >= 0 && !strcmp(xattr_buffer, "true")) {
+		current->flags &= ~PF_RANDOMIZE;
+	}
+
+	return 0;
+}
+
 static int load_elf_binary(struct linux_binprm *bprm)
 {
 	struct file *interpreter = NULL; /* to shut gcc up */
@@ -879,6 +897,7 @@ static int load_elf_binary(struct linux_binprm *bprm)
 	if (!(current->personality & ADDR_NO_RANDOMIZE) && randomize_va_space)
 		current->flags |= PF_RANDOMIZE;
 
+	check_enforce_no_randomize(bprm);
 	setup_new_exec(bprm);
 	install_exec_creds(bprm);
 
