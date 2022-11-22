@@ -1023,8 +1023,8 @@ early_param("idle", idle_setup);
 
 unsigned long arch_align_stack(unsigned long sp)
 {
-	if (!(current->personality & ADDR_NO_RANDOMIZE) && randomize_va_space)
-		sp -= get_random_u32_below(8192);
+	if (current->flags & PF_RANDOMIZE)
+		sp -= get_random_int() % 8192;
 	return sp & ~0xf;
 }
 
