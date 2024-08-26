@@ -11,11 +11,19 @@ git rebase kernel.org/linux-4.19.y
 # Build the kernel
 ```sh
 # Install deps
-sudo apt install build-essential bison flex bc
+sudo apt install build-essential bison flex bc lz4
 
-# Create config file
-make defconfig
+# Copy old config
+cp /boot/config-<...> .config
 
-# Build the kernel
+# Set new values to default value
+make olddefconfig
+
+scripts/config --disable CONFIG_SYSTEM_TRUSTED_KEYS
+
+# Custom kernel name suffix
+scripts/config --set-str CONFIG_LOCALVERSION 'ref'
+
+# Build the kernel (.deb files are stored in parent dir)
 make bindeb-pkg
 ```
