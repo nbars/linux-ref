@@ -1024,8 +1024,8 @@ early_param("idle", idle_setup);
 unsigned long arch_align_stack(unsigned long sp)
 {
 	if (current->flags & PF_RANDOMIZE)
-		sp -= get_random_int() % 8192;
-	return sp & ~0xf;
+		sp -= get_random_u32_below(8192);
+        return sp & ~0xf;
 }
 
 unsigned long arch_randomize_brk(struct mm_struct *mm)

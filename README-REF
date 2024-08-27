@@ -11,7 +11,7 @@ git rebase kernel.org/linux-4.19.y
 # Build the kernel
 ```sh
 # Install deps
-sudo apt install build-essential bison flex bc lz4 debhelper
+sudo apt install build-essential bison flex bc lz4 debhelper pahole
 
 # Copy old config
 cp /boot/config-<...> .config
